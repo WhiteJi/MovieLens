@@ -157,7 +157,7 @@ public class Recommender
 		
 		// Compute support, confidence, or lift. Based on their threshold, decide how to predict. Return 1 when metrics are satisfied by threshold, otherwise 0.
 
-		for (Set<Integer> p : Sets.combinations(anItemset, 2)) {  // 2가 맞을까?
+		for (Set<Integer> p : Sets.combinations(anItemset, 1)) {  // 2가 맞을까?
 			// the number baskets for I
 			Integer numBasketsForI = freqItemsetsWithSize1.get(p.iterator().next());
 			
