@@ -152,8 +152,33 @@ public class Recommender
 
 	private int predictPair(HashSet<Integer> anItemset, Integer j) {
 		/* TODO: implement this method */
+		if (anItemset.size() < 1)
+			return 0 ;
 		
 		// Compute support, confidence, or lift. Based on their threshold, decide how to predict. Return 1 when metrics are satisfied by threshold, otherwise 0.
+
+		for (Set<Integer> p : Sets.combinations(anItemset, 2)) {  // 2가 맞을까?
+			// the number baskets for I
+			Integer numBasketsForI = freqItemsetsWithSize1.get(p.iterator().next());
+			
+			if (numBasketsForI == null)
+				continue ;
+			// the number of baskets for I U {j}
+			TreeSet<Integer> assocRule = new TreeSet<Integer>(p) ;
+			assocRule.add(j) ;
+			FrequentItemsetSize2 item = new FrequentItemsetSize2(assocRule) ;	
+			Integer numBasketsForIUnionj = freqItemsetsWithSize2.get(item) ; // All itemsets in freqItemsetsWithSize2 satisfy minimum support when the are computed.
+			if (numBasketsForIUnionj == null)
+				continue ;
+			// compute confidence: The confidence of the rule I -> j is the ratio of the number of baskets for I U {j} and the number of baskets for I.
+			double confidence = (double) numBasketsForIUnionj / numBasketsForI;
+		
+			if (confidence >= confidence_threshold_rulesize_2) 
+				return 1; 
+		}
+
+
+
 		return 0 ;
 	}
 
@@ -243,17 +268,44 @@ class FrequentItemsetSize2 implements Comparable
 @SuppressWarnings("rawtypes")
 class FrequentItemsetSize3 implements Comparable 
 {
-	int [] items ;
+	int [] items = new int [3];
 
 	FrequentItemsetSize3(Set<Integer> s) {
 		/* TODO: implement this method */
-		
 		// values in s must be sorted and save into items array
+		Integer [] elem = s.toArray(new Integer[3]) ;
+		int temp;
+		for(int i=0; i<3; i++)
+			for(int j=1; j<(3-i); j++) {
+				if(elem[j-1] > elem[j]) {
+					temp = elem[j-1];
+					elem[j-1] = elem[j];
+					elem[j] = temp;
+				}
+			}
+		this.items[0] = elem[0];
+		this.items[1] = elem[1];
+		this.items[2] = elem[2];
+		
 	}
 
 	@Override
 	public int compareTo(Object obj) {  // this method is used for sorting when using TreeMap
 		/* TODO: implement this method */
+		FrequentItemsetSize3 p = (FrequentItemsetSize3) obj ;
+
+		if (this.items[0] < p.items[0]) 
+			return -1 ;
+		if (this.items[0] > p.items[0])
+			return 1 ;
+		if (this.items[1] < p.items[1]) 
+			return -1 ;
+		if (this.items[1] > p.items[1])
+			return 1 ;
+		if (this.items[2] < p.items[2]) 
+			return -1 ;
+		if (this.items[2] > p.items[2])
+			return 1 ;
 		return 0 ;
 	}
 }
